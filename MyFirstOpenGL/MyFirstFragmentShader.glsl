@@ -6,6 +6,11 @@ out vec4 fragColor;
 
 void main() {
 
-        fragColor = vec4(1.0, 1.0, 1.0, 1.0);    
+        if(gl_FragCoord.y > windowSize.y * 0.5){
+            fragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f); //Amarillo
+        } 
+        else {
+            fragColor = vec4(1.0f, 0.5f, 0.0f, 1.0f); //Naranja
+        }
 
 }

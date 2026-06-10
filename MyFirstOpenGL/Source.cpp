@@ -27,7 +27,7 @@ struct GameObject {
 	glm::vec3 forward = glm::vec3(1.f, 0.f, 0.f);
 
 	float fVelocity = 0.001f;
-	float fAngularVelocity = 1.f;
+	float fAngularVelocity = 0.2f;
 };
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
@@ -49,6 +49,11 @@ glm::mat4 GenerateTranslationMatrix(glm::vec3 translation) {
 glm::mat4 GenerateRotationMatrix(glm::vec3 axis, float fDegrees) {
 	return glm::rotate(glm::mat4(1.f), glm::radians(fDegrees), glm::normalize(axis));
 
+}
+
+//funcion que genera una matriz de escalado representada por un vector
+glm::mat4 GenerateScaleMatrix(glm::vec3 scale) {
+	return glm::scale(glm::mat4(1.0f), scale);
 }
 
 //Funcion que devolvera una string con todo el archivo leido
@@ -301,6 +306,12 @@ void main(){
 		//Declaro instancia del cubo
 		GameObject cube;
 
+		//Colocamos el cubo a la izquierda
+		cube.position = glm::vec3(-0.6f, 0.f, 0.f);
+		cube.forward = glm::vec3(0.f, 1.f, 0.f);
+		cube.fVelocity = 0.001f;
+		cube.fAngularVelocity = 0.1f;
+
 		//Compilar shaders
 		ShaderProgram myFirstProgram;
 		myFirstProgram.vertexShader = LoadVertexShader("MyFirstVertexShader.glsl");
@@ -346,7 +357,7 @@ void main(){
 		};
 
 		//Definimos modo de dibujo para cada cara
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(punto), punto, GL_STATIC_DRAW);
@@ -389,10 +400,10 @@ void main(){
 
 			//Calculamos la nueva posicion
 			cube.position = cube.position + cube.forward * cube.fVelocity;
-			cube.rotation = cube.rotation + glm::vec3(0.f, 1.f, 0.f) * cube.fAngularVelocity;
+			cube.rotation = cube.rotation + glm::vec3(1.f, 1.f, 0.f) * cube.fAngularVelocity;
 
 			//invertimos direccion si se sale de los limites
-			if (cube.position.x >= 0.5 || cube.position.x <= -0.5f) {
+			if (cube.position.y >= 0.75 || cube.position.y <= -0.75f) {
 				cube.forward = cube.forward * -1.f;
 			}
 
@@ -401,10 +412,13 @@ void main(){
 
 			//Genero matriz de traslacion
 			//Geneamos matriz de rotacion
-			glm::mat4 cubeRotationMatrix = GenerateRotationMatrix(glm::vec3(1.f, 1.f, 0.f), 40.f);
+			glm::mat4 cubeRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 1.f, 0.f), cube.rotation.y);
+
+			//Escalamos el cubo
+			glm::mat4 cubeScaleMatrix = GenerateScaleMatrix(glm::vec3(0.35f, 0.35f, 0.35f));
 
 			// Aplicamos matriz
-			cubeModelMatrix = cubeTranslationMatrix * cubeRotationMatrix * cubeModelMatrix;
+			cubeModelMatrix = cubeTranslationMatrix * cubeRotationMatrix * cubeScaleMatrix;
 
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubeModelMatrix));
 
