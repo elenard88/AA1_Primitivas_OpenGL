@@ -51,6 +51,11 @@ glm::mat4 GenerateRotationMatrix(glm::vec3 axis, float fDegrees) {
 
 }
 
+//funcion que genera una matriz de escalado representada por un vector
+glm::mat4 GenerateScaleMatrix(glm::vec3 scale) {
+	return glm::scale(glm::mat4(1.0f), scale);
+}
+
 //Funcion que devolvera una string con todo el archivo leido
 std::string Load_File(const std::string& filePath) {
 
@@ -301,6 +306,9 @@ void main(){
 		//Declaro instancia del cubo
 		GameObject cube;
 
+		//Colocamos el cubo a la izquierda
+		cube.position = glm::vec3(-0.6f, 0.f, 0.f);
+
 		//Compilar shaders
 		ShaderProgram myFirstProgram;
 		myFirstProgram.vertexShader = LoadVertexShader("MyFirstVertexShader.glsl");
@@ -403,8 +411,11 @@ void main(){
 			//Geneamos matriz de rotacion
 			glm::mat4 cubeRotationMatrix = GenerateRotationMatrix(glm::vec3(1.f, 1.f, 0.f), 40.f);
 
+			//Escalamos el cubo
+			glm::mat4 cubeScaleMatrix = GenerateScaleMatrix(glm::vec3(0.35f, 0.35f, 0.35f));
+
 			// Aplicamos matriz
-			cubeModelMatrix = cubeTranslationMatrix * cubeRotationMatrix * cubeModelMatrix;
+			cubeModelMatrix = cubeTranslationMatrix * cubeRotationMatrix * cubeScaleMatrix;
 
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubeModelMatrix));
 
