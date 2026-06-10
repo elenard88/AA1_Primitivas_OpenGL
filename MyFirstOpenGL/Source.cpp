@@ -310,7 +310,7 @@ void main(){
 		cube.position = glm::vec3(-0.6f, 0.f, 0.f);
 		cube.forward = glm::vec3(0.f, 1.f, 0.f);
 		cube.fVelocity = 0.001f;
-		cube.fAngularVelocity = 0.2f;
+		cube.fAngularVelocity = 0.1f;
 
 		//Compilar shaders
 		ShaderProgram myFirstProgram;
@@ -357,7 +357,7 @@ void main(){
 		};
 
 		//Definimos modo de dibujo para cada cara
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(punto), punto, GL_STATIC_DRAW);
