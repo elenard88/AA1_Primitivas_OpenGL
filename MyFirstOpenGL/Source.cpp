@@ -30,7 +30,7 @@ struct GameObject {
 	float fVelocity = 0.001f;
 	float fAngularVelocity = 0.2f;
 
-
+	float scaleFactor = 1.f;
 };
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
@@ -320,6 +320,8 @@ void main(){
 
 		//Setear variables del ortoedro
 		ortoedro.scale = glm::vec3(0.3f);
+		ortoedro.scaleFactor = -1.f;
+		ortoedro.fAngularVelocity = 1.f;
 
 		//Compilar shaders
 		ShaderProgram myFirstProgram;
@@ -492,11 +494,24 @@ void main(){
 			// Generar el modelo de la matriz MVP
 			glm::mat4 ortoedroModelMatrix = glm::mat4(1.0f);
 
+			//Actualizamos la rotación en Z
+			ortoedro.rotation.z = ortoedro.rotation.z + ortoedro.fAngularVelocity;
+
+			//Actualizamos escalado
+			ortoedro.scale.y += 0.001f * ortoedro.scaleFactor;
+
+			if (ortoedro.scale.y <= 0.15f) {
+				ortoedro.scaleFactor = 1.f;
+			}
+			else if (ortoedro.scale.y >= 0.3f) {
+				ortoedro.scaleFactor = -1.f;
+			}
+
 			//Genero matriz de traslacion
 			glm::mat4 ortoedroTranslationMatrix = GenerateTranslationMatrix(ortoedro.position);
 
 			//Geneamos matriz de rotacion
-			glm::mat4 ortoedroRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 1.f, 0.f), ortoedro.rotation.y);
+			glm::mat4 ortoedroRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 0.f, 1.f), ortoedro.rotation.z);
 
 			//Geneamos matriz de escalado
 			glm::mat4 ortoedroScaleMatrix = GenerateScaleMatrix(ortoedro.scale);
