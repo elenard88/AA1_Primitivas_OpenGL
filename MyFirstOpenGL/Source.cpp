@@ -35,6 +35,7 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 	//Definir nuevo tamaño del viewport
 	glViewport(0, 0, iFrameBufferWidth, iFrameBufferHeight);
 
+	//static cast generado con IA, 
 	glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), iFrameBufferWidth, iFrameBufferHeight);
 	
 }
@@ -122,7 +123,6 @@ GLuint LoadFragmentShader(const std::string& filePath) {
 	}
 }
 
-
 GLuint LoadGeometryShader(const std::string& filePath) {
 
 	// Crear un vertex shader
@@ -146,7 +146,6 @@ GLuint LoadGeometryShader(const std::string& filePath) {
 	if (success) {
 
 		return geometryShader;
-
 	}
 	else {
 
@@ -336,12 +335,10 @@ void main(){
 		GLuint vaoCube, vboCube, vaoPyramid, vboPyramid;
 
 		//Definimos cantidad de vao a crear y donde almacenarlos 
-		glGenVertexArrays(1, &vaoCube);
-		
+		glGenVertexArrays(1, &vaoCube);		
 
 		//Indico que el VAO activo de la GPU es el que acabo de crear
-		glBindVertexArray(vaoCube);
-		
+		glBindVertexArray(vaoCube);		
 
 		//Definimos cantidad de vbo a crear y donde almacenarlos
 		glGenBuffers(1, &vboCube);		
@@ -509,8 +506,27 @@ void main(){
 			// Aplicamos matriz
 			pyramidModelMatrix = pyramidTranslationMatrix * pyramidRotationYMatrix * pyramidRotationXMatrix * pyramidScaleMatrix;
 
+			// Calculamos el color de la piramide cada dos segundos
+			int pyramidColorIndex = static_cast<int>(glfwGetTime() / 2.0) % 3; //Linea implementada con IA
+
+			glm::vec3 pyramidColor = glm::vec3(1.f, 0.f, 0.f);
+
+			if (pyramidColorIndex == 0) {
+				pyramidColor = glm::vec3(1.f, 0.f, 0.f); // Rojo
+			}
+			else if (pyramidColorIndex == 1) {
+				pyramidColor = glm::vec3(0.f, 1.f, 0.f); // Verde
+			}
+			else {
+				pyramidColor = glm::vec3(0.f, 0.f, 1.f); // Azul
+			}
+
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubeModelMatrix));
 
+			// Indicamos el color
+			glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 0);
+
+			//Usamos VAO del cubo
 			glBindVertexArray(vaoCube);
 
 			// Definimos que queremos dibujar
@@ -521,6 +537,12 @@ void main(){
 
 			//matriz piramide
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(pyramidModelMatrix));
+
+			// Indicamos que la piramide usa color solido
+			glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 1);
+
+			// Enviamos el color actual de la piramide
+			glUniform3f(glGetUniformLocation(compiledPrograms[0], "solidColor"), pyramidColor.x, pyramidColor.y,pyramidColor.z);
 
 			glBindVertexArray(vaoPyramid);
 
