@@ -24,10 +24,13 @@ struct GameObject {
 
 	glm::vec3 position = glm::vec3(0.f);
 	glm::vec3 rotation = glm::vec3(0.f);
-	glm::vec3 forward = glm::vec3(1.f, 0.f, 0.f);
+	glm::vec3 scale = glm::vec3(1.f);
 
+	glm::vec3 forward = glm::vec3(1.f, 0.f, 0.f);
 	float fVelocity = 0.001f;
 	float fAngularVelocity = 0.2f;
+
+
 };
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
@@ -312,6 +315,12 @@ void main(){
 		cube.fVelocity = 0.001f;
 		cube.fAngularVelocity = 0.1f;
 
+		//Declarar el ortoedro
+		GameObject ortoedro;
+
+		//Setear variables del ortoedro
+		ortoedro.scale = glm::vec3(0.3f);
+
 		//Compilar shaders
 		ShaderProgram myFirstProgram;
 		myFirstProgram.vertexShader = LoadVertexShader("MyFirstVertexShader.glsl");
@@ -374,14 +383,59 @@ void main(){
 		//Desvinculamos VAO
 		glBindVertexArray(0);
 
+		/*
+		CONFIGURACION DEL ORTOEDRO
+		*/
+
+		GLuint vaoOrtoedro, vboOrtoedro;
+
+		//Crear VAO para el ortoedro
+		glGenVertexArrays(1, &vaoOrtoedro);
+		glBindVertexArray(vaoOrtoedro);
+
+		//Crear VBO para el ortoedro
+		glGenBuffers(1, &vboOrtoedro);
+		glBindBuffer(GL_ARRAY_BUFFER, vboOrtoedro);
+
+		//Vertices ortoedro
+		GLfloat verticesOrtoedro[] = {
+			-0.5f, +1.f, -0.5f, // 3
+			+0.5f, +1.f, -0.5f, // 2
+			-0.5f, -1.f, -0.5f, // 6
+			+0.5f, -1.f, -0.5f, // 7
+			+0.5f, -1.f, +0.5f, // 4
+			+0.5f, +1.f, -0.5f, // 2
+			+0.5f, +1.f, +0.5f, // 0
+			-0.5f, +1.f, -0.5f, // 3
+			-0.5f, +1.f, +0.5f, // 1
+			-0.5f, -1.f, -0.5f, // 6
+			-0.5f, -1.f, +0.5f, // 5
+			+0.5f, -1.f, +0.5f, // 4
+			-0.5f, +1.f, +0.5f, // 1
+			+0.5f, +1.f, +0.5f  // 0
+		};
+
+		//Ponemos los valores en el VBO creado
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verticesOrtoedro), verticesOrtoedro, GL_STATIC_DRAW);
+
+		//Indicamos donde almacenar y como esta distribuida la información
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+		//Indicamos que la tarjeta gráfica puede usar el atributo 0
+		glEnableVertexAttribArray(0);
+
+		//Desvinculamos VBO
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		//Desvinculamos VAO
+		glBindVertexArray(0);
+
+
 		//Indicar a la tarjeta GPU que programa debe usar
 		glUseProgram(compiledPrograms[0]);
 
-		
-
 		//Asignar valores iniciales al programa
 		glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
-		
 
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window)) {
@@ -425,6 +479,36 @@ void main(){
 			//Definimos que queremos dibujar
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 			
+			//Dejamos de usar el VAO indicado anteriormente
+			glBindVertexArray(0);
+
+			/*
+			DIBUJAR ORTOEDRO
+			*/
+
+			//Definimos que queremos usar el VAO del ortoedro
+			glBindVertexArray(vaoOrtoedro);
+
+			// Generar el modelo de la matriz MVP
+			glm::mat4 ortoedroModelMatrix = glm::mat4(1.0f);
+
+			//Genero matriz de traslacion
+			glm::mat4 ortoedroTranslationMatrix = GenerateTranslationMatrix(ortoedro.position);
+
+			//Geneamos matriz de rotacion
+			glm::mat4 ortoedroRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 1.f, 0.f), ortoedro.rotation.y);
+
+			//Geneamos matriz de escalado
+			glm::mat4 ortoedroScaleMatrix = GenerateScaleMatrix(ortoedro.scale);
+
+			// Aplicamos matriz
+			ortoedroModelMatrix = ortoedroTranslationMatrix * ortoedroRotationMatrix * ortoedroScaleMatrix;
+
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedroModelMatrix));
+
+			//Dibujamos el ortoedro
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);
 
