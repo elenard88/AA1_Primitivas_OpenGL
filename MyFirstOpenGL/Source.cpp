@@ -35,6 +35,7 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 	//Definir nuevo tamaño del viewport
 	glViewport(0, 0, iFrameBufferWidth, iFrameBufferHeight);
 
+	//static cast generado con IA, 
 	glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), iFrameBufferWidth, iFrameBufferHeight);
 	
 }
@@ -122,7 +123,6 @@ GLuint LoadFragmentShader(const std::string& filePath) {
 	}
 }
 
-
 GLuint LoadGeometryShader(const std::string& filePath) {
 
 	// Crear un vertex shader
@@ -146,7 +146,6 @@ GLuint LoadGeometryShader(const std::string& filePath) {
 	if (success) {
 
 		return geometryShader;
-
 	}
 	else {
 
@@ -306,11 +305,20 @@ void main(){
 		//Declaro instancia del cubo
 		GameObject cube;
 
-		//Colocamos el cubo a la izquierda
+		//vaores iniciales del cubo
 		cube.position = glm::vec3(-0.6f, 0.f, 0.f);
 		cube.forward = glm::vec3(0.f, 1.f, 0.f);
 		cube.fVelocity = 0.001f;
 		cube.fAngularVelocity = 0.1f;
+
+		//Declaro instancia dela piramide
+		GameObject pyramid;
+
+		//valores iniciales de la piramide
+		pyramid.position = glm::vec3(0.75f, 0.f, 0.f);
+		pyramid.forward = glm::vec3(0.f, 1.f, 0.f);
+		pyramid.fVelocity = 0.001f;
+		pyramid.fAngularVelocity = 0.1f;
 
 		//Compilar shaders
 		ShaderProgram myFirstProgram;
@@ -324,22 +332,22 @@ void main(){
 		//Definimos color para limpiar el buffer de color
 		glClearColor(0.f, 0.f, 0.f, 1.f);
 
-		GLuint vaoPuntos, vboPuntos;
+		GLuint vaoCube, vboCube, vaoPyramid, vboPyramid;
 
 		//Definimos cantidad de vao a crear y donde almacenarlos 
-		glGenVertexArrays(1, &vaoPuntos);
+		glGenVertexArrays(1, &vaoCube);		
 
 		//Indico que el VAO activo de la GPU es el que acabo de crear
-		glBindVertexArray(vaoPuntos);
+		glBindVertexArray(vaoCube);		
 
 		//Definimos cantidad de vbo a crear y donde almacenarlos
-		glGenBuffers(1, &vboPuntos);
+		glGenBuffers(1, &vboCube);		
 
 		//Indico que el VBO activo es el que acabo de crear y que almacenará un array. Todos los VBO que genere se asignaran al último VAO que he hecho glBindVertexArray
-		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);		
-
-		//Posición X e Y del punto
-		GLfloat punto[] = {
+		glBindBuffer(GL_ARRAY_BUFFER, vboCube);		
+		
+		//Posición X e Y del cubo
+		GLfloat cubePunto[] = {
 			-0.5f, +0.5f, -0.5f, // 3
 			+0.5f, +0.5f, -0.5f, // 2
 			-0.5f, -0.5f, -0.5f, // 6
@@ -356,11 +364,8 @@ void main(){
 			+0.5f, +0.5f, +0.5f  // 0
 		};
 
-		//Definimos modo de dibujo para cada cara
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 		//Ponemos los valores en el VBO creado
-		glBufferData(GL_ARRAY_BUFFER, sizeof(punto), punto, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(cubePunto), cubePunto, GL_STATIC_DRAW);
 
 		//Indicamos donde almacenar y como esta distribuida la información
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
@@ -374,15 +379,77 @@ void main(){
 		//Desvinculamos VAO
 		glBindVertexArray(0);
 
+		//pyramid
+		//Definimos cantidad de vao a crear y donde almacenarlos 
+		glGenVertexArrays(1, &vaoPyramid);
+
+		//Indico que el VAO activo de la GPU es el que acabo de crear
+		glBindVertexArray(vaoPyramid);
+
+		//Definimos cantidad de vbo a crear y donde almacenarlos
+		glGenBuffers(1, &vboPyramid);
+
+		//Indico que el VBO activo es el que acabo de crear y que almacenará un array. Todos los VBO que genere se asignaran al último VAO que he hecho glBindVertexArray
+		glBindBuffer(GL_ARRAY_BUFFER, vboPyramid);
+
+		//Posición X e Y de la piramide
+		GLfloat pyramidPunto[] = {
+
+			// Cara frontal
+			+0.0f, +0.5f, +0.0f,
+			-0.5f, -0.5f, +0.5f,
+			+0.5f, -0.5f, +0.5f,
+
+			// Cara derecha
+			+0.0f, +0.5f, +0.0f,
+			+0.5f, -0.5f, +0.5f,
+			+0.5f, -0.5f, -0.5f,
+
+			// Cara trasera
+			+0.0f, +0.5f, +0.0f,
+			+0.5f, -0.5f, -0.5f,
+			-0.5f, -0.5f, -0.5f,
+
+			// Cara izquierda
+			+0.0f, +0.5f, +0.0f,
+			-0.5f, -0.5f, -0.5f,
+			-0.5f, -0.5f, +0.5f,
+
+			// Base de la piramide - triangulo 1
+			-0.5f, -0.5f, +0.5f,
+			-0.5f, -0.5f, -0.5f,
+			+0.5f, -0.5f, -0.5f,
+
+			// Base de la piramide - triangulo 2
+			-0.5f, -0.5f, +0.5f,
+			+0.5f, -0.5f, -0.5f,
+			+0.5f, -0.5f, +0.5f
+		};
+
+		//Ponemos los valores en el VBO creado
+		glBufferData(GL_ARRAY_BUFFER, sizeof(pyramidPunto), pyramidPunto, GL_STATIC_DRAW);
+
+		//Indicamos donde almacenar y como esta distribuida la información
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+		//Indicamos que la tarjeta gráfica puede usar el atributo 0
+		glEnableVertexAttribArray(0);
+
+		//Desvinculamos VBO
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		//Desvinculamos VAO
+		glBindVertexArray(0);
+
+		//Definimos modo de dibujo para cada cara
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 		//Indicar a la tarjeta GPU que programa debe usar
 		glUseProgram(compiledPrograms[0]);
 
-		
-
 		//Asignar valores iniciales al programa
 		glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
-		
-
+	
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window)) {
 
@@ -392,13 +459,11 @@ void main(){
 			//Limpiamos los buffers
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-			//Definimos que queremos usar el VAO con los puntos
-			glBindVertexArray(vaoPuntos);
-
 			// Generar el modelo de la matriz MVP
 			glm::mat4 cubeModelMatrix = glm::mat4(1.0f);
+			glm::mat4 pyramidModelMatrix = glm::mat4(1.0f);
 
-			//Calculamos la nueva posicion
+			//Calculamos la nueva posicion del cubo
 			cube.position = cube.position + cube.forward * cube.fVelocity;
 			cube.rotation = cube.rotation + glm::vec3(1.f, 1.f, 0.f) * cube.fAngularVelocity;
 
@@ -407,10 +472,18 @@ void main(){
 				cube.forward = cube.forward * -1.f;
 			}
 
-			//Genero matriz de rotacion
-			glm::mat4 cubeTranslationMatrix = GenerateTranslationMatrix(cube.position);
+			//Calculamos la nueva posicion de la piramide
+			pyramid.position = pyramid.position + pyramid.forward * pyramid.fVelocity;
+			pyramid.rotation = pyramid.rotation + glm::vec3(1.f, 1.f, 0.f) * pyramid.fAngularVelocity;
+
+			//invertimos direccion si se sale de los limites
+			if (pyramid.position.y >= 0.75 || pyramid.position.y <= -0.75f) {
+				pyramid.forward = pyramid.forward * -1.f;
+			}
 
 			//Genero matriz de traslacion
+			glm::mat4 cubeTranslationMatrix = GenerateTranslationMatrix(cube.position);
+			
 			//Geneamos matriz de rotacion
 			glm::mat4 cubeRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 1.f, 0.f), cube.rotation.y);
 
@@ -420,10 +493,61 @@ void main(){
 			// Aplicamos matriz
 			cubeModelMatrix = cubeTranslationMatrix * cubeRotationMatrix * cubeScaleMatrix;
 
+			//Genero matriz de traslacion
+			glm::mat4 pyramidTranslationMatrix = GenerateTranslationMatrix(pyramid.position);
+
+			//Geneamos matriz de rotacion
+			glm::mat4 pyramidRotationXMatrix = GenerateRotationMatrix(glm::vec3(1.f, 0.f, 0.f), pyramid.rotation.x);
+			glm::mat4 pyramidRotationYMatrix = GenerateRotationMatrix(glm::vec3(0.f, 1.f, 0.f), pyramid.rotation.y);			
+
+			//Escalamos
+			glm::mat4 pyramidScaleMatrix = GenerateScaleMatrix(glm::vec3(0.35f, 0.35f, 0.35f));
+
+			// Aplicamos matriz
+			pyramidModelMatrix = pyramidTranslationMatrix * pyramidRotationYMatrix * pyramidRotationXMatrix * pyramidScaleMatrix;
+
+			// Calculamos el color de la piramide cada dos segundos
+			int pyramidColorIndex = static_cast<int>(glfwGetTime() / 2.0) % 3; //Linea implementada con IA
+
+			glm::vec3 pyramidColor = glm::vec3(1.f, 0.f, 0.f);
+
+			if (pyramidColorIndex == 0) {
+				pyramidColor = glm::vec3(1.f, 0.f, 0.f); // Rojo
+			}
+			else if (pyramidColorIndex == 1) {
+				pyramidColor = glm::vec3(0.f, 1.f, 0.f); // Verde
+			}
+			else {
+				pyramidColor = glm::vec3(0.f, 0.f, 1.f); // Azul
+			}
+
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubeModelMatrix));
 
-			//Definimos que queremos dibujar
+			// Indicamos el color
+			glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 0);
+
+			//Usamos VAO del cubo
+			glBindVertexArray(vaoCube);
+
+			// Definimos que queremos dibujar
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+
+			//Dejamos de usar el VAO indicado anteriormente
+			glBindVertexArray(0);
+
+			//matriz piramide
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(pyramidModelMatrix));
+
+			// Indicamos que la piramide usa color solido
+			glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 1);
+
+			// Enviamos el color actual de la piramide
+			glUniform3f(glGetUniformLocation(compiledPrograms[0], "solidColor"), pyramidColor.x, pyramidColor.y,pyramidColor.z);
+
+			glBindVertexArray(vaoPyramid);
+
+			//Definimos que queremos dibujar
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 			
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);

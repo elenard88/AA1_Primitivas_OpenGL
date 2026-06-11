@@ -1,16 +1,26 @@
 #version 440 core
 
 uniform vec2 windowSize;
+uniform int colorMode;
+uniform vec3 solidColor;
 
 out vec4 fragColor;
 
 void main() {
 
-        if(gl_FragCoord.y > windowSize.y * 0.5){
+    if (colorMode == 0)
+    {
+        if (gl_FragCoord.y > windowSize.y * 0.5)
+        {
             fragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f); //Amarillo
         } 
-        else {
+        else 
+        {
             fragColor = vec4(1.0f, 0.5f, 0.0f, 1.0f); //Naranja
         }
-
+    }
+    else
+    {
+        fragColor = vec4(solidColor, 1.0f);
+    }
 }
