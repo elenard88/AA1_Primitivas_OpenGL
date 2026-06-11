@@ -24,15 +24,18 @@ struct GameObject {
 
 	glm::vec3 position = glm::vec3(0.f);
 	glm::vec3 rotation = glm::vec3(0.f);
-	glm::vec3 forward = glm::vec3(1.f, 0.f, 0.f);
+	glm::vec3 scale = glm::vec3(1.f);
 
+	glm::vec3 forward = glm::vec3(1.f, 0.f, 0.f);
 	float fVelocity = 0.001f;
 	float fAngularVelocity = 0.2f;
+
+	float scaleFactor = 1.f;
 };
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
 
-	//Definir nuevo tamaño del viewport
+	//Definir nuevo tamaï¿½o del viewport
 	glViewport(0, 0, iFrameBufferWidth, iFrameBufferHeight);
 
 	//static cast generado con IA, 
@@ -91,13 +94,13 @@ GLuint LoadFragmentShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el fragment shader con su código fuente
+	//Vinculamos el fragment shader con su cï¿½digo fuente
 	glShaderSource(fragmentShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el fragment shader
 	glCompileShader(fragmentShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 
@@ -132,13 +135,13 @@ GLuint LoadGeometryShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el vertex shader con su código fuente
+	//Vinculamos el vertex shader con su cï¿½digo fuente
 	glShaderSource(geometryShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el vertex shader
 	glCompileShader(geometryShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
 
@@ -172,13 +175,13 @@ GLuint LoadVertexShader(const std::string& filePath) {
 	std::string sShaderCode = Load_File(filePath);
 	const char* cShaderSource = sShaderCode.c_str();
 
-	//Vinculamos el vertex shader con su código fuente
+	//Vinculamos el vertex shader con su cï¿½digo fuente
 	glShaderSource(vertexShader, 1, &cShaderSource, nullptr);
 
 	// Compilar el vertex shader
 	glCompileShader(vertexShader);
 
-	// Verificar errores de compilación
+	// Verificar errores de compilaciï¿½n
 	GLint success;
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
@@ -203,7 +206,7 @@ GLuint LoadVertexShader(const std::string& filePath) {
 	}
 }
 
-//Función que dado un struct que contiene los shaders de un programa generara el programa entero de la GPU
+//Funciï¿½n que dado un struct que contiene los shaders de un programa generara el programa entero de la GPU
 GLuint CreateProgram(const ShaderProgram& shaders) {
 
 	//Crear programa de la GPU
@@ -266,7 +269,7 @@ GLuint CreateProgram(const ShaderProgram& shaders) {
 
 void main(){
 
-	//Definir semillas del rand según el tiempo
+	//Definir semillas del rand segï¿½n el tiempo
 	srand(static_cast<unsigned int>(time(NULL)));
 
 	//Inicializamos GLFW para gestionar ventanas e inputs
@@ -281,7 +284,7 @@ void main(){
 	//Inicializamos la ventana
 	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "My Engine", NULL, NULL);
 
-	//Asignamos función de callback para cuando el frame buffer es modificado
+	//Asignamos funciï¿½n de callback para cuando el frame buffer es modificado
 	glfwSetFramebufferSizeCallback(window, Resize_Window);
 
 	//Definimos espacio de trabajo
@@ -310,6 +313,14 @@ void main(){
 		cube.forward = glm::vec3(0.f, 1.f, 0.f);
 		cube.fVelocity = 0.001f;
 		cube.fAngularVelocity = 0.1f;
+
+		//Declarar el ortoedro
+		GameObject ortoedro;
+
+		//Setear variables del ortoedro
+		ortoedro.scale = glm::vec3(0.3f);
+		ortoedro.scaleFactor = -1.f;
+		ortoedro.fAngularVelocity = 1.f;
 
 		//Declaro instancia dela piramide
 		GameObject pyramid;
@@ -343,10 +354,10 @@ void main(){
 		//Definimos cantidad de vbo a crear y donde almacenarlos
 		glGenBuffers(1, &vboCube);		
 
-		//Indico que el VBO activo es el que acabo de crear y que almacenará un array. Todos los VBO que genere se asignaran al último VAO que he hecho glBindVertexArray
+		//Indico que el VBO activo es el que acabo de crear y que almacenarï¿½ un array. Todos los VBO que genere se asignaran al ï¿½ltimo VAO que he hecho glBindVertexArray
 		glBindBuffer(GL_ARRAY_BUFFER, vboCube);		
 		
-		//Posición X e Y del cubo
+		//Posiciï¿½n X e Y del cubo
 		GLfloat cubePunto[] = {
 			-0.5f, +0.5f, -0.5f, // 3
 			+0.5f, +0.5f, -0.5f, // 2
@@ -367,10 +378,10 @@ void main(){
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(cubePunto), cubePunto, GL_STATIC_DRAW);
 
-		//Indicamos donde almacenar y como esta distribuida la información
+		//Indicamos donde almacenar y como esta distribuida la informaciï¿½n
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
-		//Indicamos que la tarjeta gráfica puede usar el atributo 0
+		//Indicamos que la tarjeta grï¿½fica puede usar el atributo 0
 		glEnableVertexAttribArray(0);
 
 		//Desvinculamos VBO
@@ -389,10 +400,10 @@ void main(){
 		//Definimos cantidad de vbo a crear y donde almacenarlos
 		glGenBuffers(1, &vboPyramid);
 
-		//Indico que el VBO activo es el que acabo de crear y que almacenará un array. Todos los VBO que genere se asignaran al último VAO que he hecho glBindVertexArray
+		//Indico que el VBO activo es el que acabo de crear y que almacenarï¿½ un array. Todos los VBO que genere se asignaran al ï¿½ltimo VAO que he hecho glBindVertexArray
 		glBindBuffer(GL_ARRAY_BUFFER, vboPyramid);
 
-		//Posición X e Y de la piramide
+		//Posiciï¿½n X e Y de la piramide
 		GLfloat pyramidPunto[] = {
 
 			// Cara frontal
@@ -429,10 +440,10 @@ void main(){
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(pyramidPunto), pyramidPunto, GL_STATIC_DRAW);
 
-		//Indicamos donde almacenar y como esta distribuida la información
+		//Indicamos donde almacenar y como esta distribuida la informaciï¿½n
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
-		//Indicamos que la tarjeta gráfica puede usar el atributo 0
+		//Indicamos que la tarjeta grï¿½fica puede usar el atributo 0
 		glEnableVertexAttribArray(0);
 
 		//Desvinculamos VBO
@@ -440,6 +451,54 @@ void main(){
 
 		//Desvinculamos VAO
 		glBindVertexArray(0);
+
+		/*
+		CONFIGURACION DEL ORTOEDRO
+		*/
+
+		GLuint vaoOrtoedro, vboOrtoedro;
+
+		//Crear VAO para el ortoedro
+		glGenVertexArrays(1, &vaoOrtoedro);
+		glBindVertexArray(vaoOrtoedro);
+
+		//Crear VBO para el ortoedro
+		glGenBuffers(1, &vboOrtoedro);
+		glBindBuffer(GL_ARRAY_BUFFER, vboOrtoedro);
+
+		//Vertices ortoedro
+		GLfloat verticesOrtoedro[] = {
+			-0.5f, +1.f, -0.5f, // 3
+			+0.5f, +1.f, -0.5f, // 2
+			-0.5f, -1.f, -0.5f, // 6
+			+0.5f, -1.f, -0.5f, // 7
+			+0.5f, -1.f, +0.5f, // 4
+			+0.5f, +1.f, -0.5f, // 2
+			+0.5f, +1.f, +0.5f, // 0
+			-0.5f, +1.f, -0.5f, // 3
+			-0.5f, +1.f, +0.5f, // 1
+			-0.5f, -1.f, -0.5f, // 6
+			-0.5f, -1.f, +0.5f, // 5
+			+0.5f, -1.f, +0.5f, // 4
+			-0.5f, +1.f, +0.5f, // 1
+			+0.5f, +1.f, +0.5f  // 0
+		};
+
+		//Ponemos los valores en el VBO creado
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verticesOrtoedro), verticesOrtoedro, GL_STATIC_DRAW);
+
+		//Indicamos donde almacenar y como esta distribuida la informaciï¿½n
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+		//Indicamos que la tarjeta grï¿½fica puede usar el atributo 0
+		glEnableVertexAttribArray(0);
+
+		//Desvinculamos VBO
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		//Desvinculamos VAO
+		glBindVertexArray(0);
+
 
 		//Definimos modo de dibujo para cada cara
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -449,7 +508,7 @@ void main(){
 
 		//Asignar valores iniciales al programa
 		glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
-	
+
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window)) {
 
@@ -549,6 +608,49 @@ void main(){
 			//Definimos que queremos dibujar
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 			
+			//Dejamos de usar el VAO indicado anteriormente
+			glBindVertexArray(0);
+
+			/*
+			DIBUJAR ORTOEDRO
+			*/
+
+			//Definimos que queremos usar el VAO del ortoedro
+			glBindVertexArray(vaoOrtoedro);
+
+			// Generar el modelo de la matriz MVP
+			glm::mat4 ortoedroModelMatrix = glm::mat4(1.0f);
+
+			//Actualizamos la rotaciï¿½n en Z
+			ortoedro.rotation.z = ortoedro.rotation.z + ortoedro.fAngularVelocity;
+
+			//Actualizamos escalado
+			ortoedro.scale.y += 0.001f * ortoedro.scaleFactor;
+
+			if (ortoedro.scale.y <= 0.15f) {
+				ortoedro.scaleFactor = 1.f;
+			}
+			else if (ortoedro.scale.y >= 0.3f) {
+				ortoedro.scaleFactor = -1.f;
+			}
+
+			//Genero matriz de traslacion
+			glm::mat4 ortoedroTranslationMatrix = GenerateTranslationMatrix(ortoedro.position);
+
+			//Geneamos matriz de rotacion
+			glm::mat4 ortoedroRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 0.f, 1.f), ortoedro.rotation.z);
+
+			//Geneamos matriz de escalado
+			glm::mat4 ortoedroScaleMatrix = GenerateScaleMatrix(ortoedro.scale);
+
+			// Aplicamos matriz
+			ortoedroModelMatrix = ortoedroTranslationMatrix * ortoedroRotationMatrix * ortoedroScaleMatrix;
+
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedroModelMatrix));
+
+			//Dibujamos el ortoedro
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);
 
