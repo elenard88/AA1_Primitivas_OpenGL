@@ -507,11 +507,55 @@ void main(){
 		//Asignar valores iniciales al programa
 		glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
+		//Variables para el sistema de inputs
+		bool isPaused = false;                    // Control de pausa
+		float speedMultiplier = 1.0f;             // Multiplicador de velocidad
+		bool spacePressed = false;                // Detectar cambio de estado de espacio
+		bool mPressed = false;                    // Detectar cambio de estado de M
+		bool nPressed = false;                    // Detectar cambio de estado de N
+
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window)) {
 
 			//Pulleamos los eventos (botones, teclas, mouse...)
 			glfwPollEvents();
+
+			//Detectar Espacio para pausar/reanudar
+			if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+				if (!spacePressed) {
+					isPaused = !isPaused;  // Cambiar estado de pausa
+					spacePressed = true;
+				}
+			}
+			else {
+				spacePressed = false;
+			}
+
+			//Los siguientes inputs solo funcionan si NO está pausado
+			if (!isPaused) {
+
+				//Detectar M para acelerar velocidad en un 10%
+				if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+					if (!mPressed) {
+						speedMultiplier *= 1.1f;  // Acelerar 10%
+						mPressed = true;
+					}
+				}
+				else {
+					mPressed = false;
+				}
+
+				//Detectar N para reducir velocidad en un 10%
+				if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+					if (!nPressed) {
+						speedMultiplier *= 0.9f;  // Reducir 10%
+						nPressed = true;
+					}
+				}
+				else {
+					nPressed = false;
+				}
+			}
 
 			//Limpiamos los buffers
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -521,23 +565,19 @@ void main(){
 			glm::mat4 pyramidModelMatrix = glm::mat4(1.0f);
 			glm::mat4 ortoedroModelMatrix = glm::mat4(1.0f);
 
+			/*
+			DIBUJAR CUBO
+			*/
 
-			//Calculamos la nueva posicion del cubo
-			cube.position = cube.position + cube.forward * cube.fVelocity;
-			cube.rotation = cube.rotation + glm::vec3(1.f, 1.f, 0.f) * cube.fAngularVelocity;
+			if (!isPaused) {
+				//Calculamos la nueva posicion del cubo
+				cube.position = cube.position + cube.forward * cube.fVelocity * speedMultiplier;
+				cube.rotation = cube.rotation + glm::vec3(1.f, 1.f, 0.f) * cube.fAngularVelocity * speedMultiplier;
 
-			//invertimos direccion si se sale de los limites
-			if (cube.position.y >= 0.75 || cube.position.y <= -0.75f) {
-				cube.forward = cube.forward * -1.f;
-			}
-
-			//Calculamos la nueva posicion de la piramide
-			pyramid.position = pyramid.position + pyramid.forward * pyramid.fVelocity;
-			pyramid.rotation = pyramid.rotation + glm::vec3(1.f, 1.f, 0.f) * pyramid.fAngularVelocity;
-
-			//invertimos direccion si se sale de los limites
-			if (pyramid.position.y >= 0.75 || pyramid.position.y <= -0.75f) {
-				pyramid.forward = pyramid.forward * -1.f;
+				//invertimos direccion si se sale de los limites
+				if (cube.position.y >= 0.75 || cube.position.y <= -0.75f) {
+					cube.forward = cube.forward * -1.f;
+				}
 			}
 
 			//Genero matriz de traslacion
@@ -556,17 +596,19 @@ void main(){
 			DIBUJAR ORTOEDRO
 			*/
 
-			//Actualizamos la rotaci�n en Z
-			ortoedro.rotation.z = ortoedro.rotation.z + ortoedro.fAngularVelocity;
+			if (!isPaused) {
+				//Actualizamos la rotacion en Z
+				ortoedro.rotation.z = ortoedro.rotation.z + ortoedro.fAngularVelocity * speedMultiplier;
 
-			//Actualizamos escalado
-			ortoedro.scale.y += 0.001f * ortoedro.scaleFactor;
+				//Actualizamos escalado
+				ortoedro.scale.y += 0.001f * ortoedro.scaleFactor;
 
-			if (ortoedro.scale.y <= 0.1f) {
-				ortoedro.scaleFactor = 1.f;
-			}
-			else if (ortoedro.scale.y >= 0.5f) {
-				ortoedro.scaleFactor = -1.f;
+				if (ortoedro.scale.y <= 0.1f) {
+					ortoedro.scaleFactor = 1.f;
+				}
+				else if (ortoedro.scale.y >= 0.5f) {
+					ortoedro.scaleFactor = -1.f;
+				}
 			}
 
 			//Genero matriz de traslacion
@@ -580,6 +622,21 @@ void main(){
 
 			// Aplicamos matriz
 			ortoedroModelMatrix = ortoedroTranslationMatrix * ortoedroRotationMatrix * ortoedroScaleMatrix;
+
+			/*
+			DIBUJAR PIRAMIDE
+			*/
+
+			if (!isPaused) {
+				//Calculamos la nueva posicion de la piramide
+				pyramid.position = pyramid.position + pyramid.forward * pyramid.fVelocity * speedMultiplier;
+				pyramid.rotation = pyramid.rotation + glm::vec3(1.f, 1.f, 0.f) * pyramid.fAngularVelocity * speedMultiplier;
+
+				//invertimos direccion si se sale de los limites
+				if (pyramid.position.y >= 0.75 || pyramid.position.y <= -0.75f) {
+					pyramid.forward = pyramid.forward * -1.f;
+				}
+			}
 
 			//Genero matriz de traslacion
 			glm::mat4 pyramidTranslationMatrix = GenerateTranslationMatrix(pyramid.position);
