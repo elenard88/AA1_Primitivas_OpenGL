@@ -320,7 +320,7 @@ void main(){
 		//Setear variables del ortoedro
 		ortoedro.scale = glm::vec3(0.3f);
 		ortoedro.scaleFactor = -1.f;
-		ortoedro.fAngularVelocity = 1.f;
+		ortoedro.fAngularVelocity = 0.1f;
 
 		//Declaro instancia dela piramide
 		GameObject pyramid;
@@ -343,7 +343,7 @@ void main(){
 		//Definimos color para limpiar el buffer de color
 		glClearColor(0.f, 0.f, 0.f, 1.f);
 
-		GLuint vaoCube, vboCube, vaoPyramid, vboPyramid;
+		GLuint vaoCube, vboCube, vaoPyramid, vboPyramid, vaoOrtoedro, vboOrtoedro;;
 
 		//Definimos cantidad de vao a crear y donde almacenarlos 
 		glGenVertexArrays(1, &vaoCube);		
@@ -456,8 +456,6 @@ void main(){
 		CONFIGURACION DEL ORTOEDRO
 		*/
 
-		GLuint vaoOrtoedro, vboOrtoedro;
-
 		//Crear VAO para el ortoedro
 		glGenVertexArrays(1, &vaoOrtoedro);
 		glBindVertexArray(vaoOrtoedro);
@@ -501,7 +499,7 @@ void main(){
 
 
 		//Definimos modo de dibujo para cada cara
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Indicar a la tarjeta GPU que programa debe usar
 		glUseProgram(compiledPrograms[0]);
@@ -521,6 +519,8 @@ void main(){
 			// Generar el modelo de la matriz MVP
 			glm::mat4 cubeModelMatrix = glm::mat4(1.0f);
 			glm::mat4 pyramidModelMatrix = glm::mat4(1.0f);
+			glm::mat4 ortoedroModelMatrix = glm::mat4(1.0f);
+
 
 			//Calculamos la nueva posicion del cubo
 			cube.position = cube.position + cube.forward * cube.fVelocity;
@@ -551,6 +551,35 @@ void main(){
 
 			// Aplicamos matriz
 			cubeModelMatrix = cubeTranslationMatrix * cubeRotationMatrix * cubeScaleMatrix;
+
+			/*
+			DIBUJAR ORTOEDRO
+			*/
+
+			//Actualizamos la rotaci�n en Z
+			ortoedro.rotation.z = ortoedro.rotation.z + ortoedro.fAngularVelocity;
+
+			//Actualizamos escalado
+			ortoedro.scale.y += 0.001f * ortoedro.scaleFactor;
+
+			if (ortoedro.scale.y <= 0.1f) {
+				ortoedro.scaleFactor = 1.f;
+			}
+			else if (ortoedro.scale.y >= 0.5f) {
+				ortoedro.scaleFactor = -1.f;
+			}
+
+			//Genero matriz de traslacion
+			glm::mat4 ortoedroTranslationMatrix = GenerateTranslationMatrix(ortoedro.position);
+
+			//Geneamos matriz de rotacion
+			glm::mat4 ortoedroRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 0.f, 1.f), ortoedro.rotation.z);
+
+			//Geneamos matriz de escalado
+			glm::mat4 ortoedroScaleMatrix = GenerateScaleMatrix(ortoedro.scale);
+
+			// Aplicamos matriz
+			ortoedroModelMatrix = ortoedroTranslationMatrix * ortoedroRotationMatrix * ortoedroScaleMatrix;
 
 			//Genero matriz de traslacion
 			glm::mat4 pyramidTranslationMatrix = GenerateTranslationMatrix(pyramid.position);
@@ -591,6 +620,14 @@ void main(){
 			// Definimos que queremos dibujar
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedroModelMatrix));
+
+			//Definimos que queremos usar el VAO del ortoedro
+			glBindVertexArray(vaoOrtoedro);
+
+			//Dibujamos el ortoedro
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);
 
@@ -608,49 +645,6 @@ void main(){
 			//Definimos que queremos dibujar
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 			
-			//Dejamos de usar el VAO indicado anteriormente
-			glBindVertexArray(0);
-
-			/*
-			DIBUJAR ORTOEDRO
-			*/
-
-			//Definimos que queremos usar el VAO del ortoedro
-			glBindVertexArray(vaoOrtoedro);
-
-			// Generar el modelo de la matriz MVP
-			glm::mat4 ortoedroModelMatrix = glm::mat4(1.0f);
-
-			//Actualizamos la rotaci�n en Z
-			ortoedro.rotation.z = ortoedro.rotation.z + ortoedro.fAngularVelocity;
-
-			//Actualizamos escalado
-			ortoedro.scale.y += 0.001f * ortoedro.scaleFactor;
-
-			if (ortoedro.scale.y <= 0.15f) {
-				ortoedro.scaleFactor = 1.f;
-			}
-			else if (ortoedro.scale.y >= 0.3f) {
-				ortoedro.scaleFactor = -1.f;
-			}
-
-			//Genero matriz de traslacion
-			glm::mat4 ortoedroTranslationMatrix = GenerateTranslationMatrix(ortoedro.position);
-
-			//Geneamos matriz de rotacion
-			glm::mat4 ortoedroRotationMatrix = GenerateRotationMatrix(glm::vec3(0.f, 0.f, 1.f), ortoedro.rotation.z);
-
-			//Geneamos matriz de escalado
-			glm::mat4 ortoedroScaleMatrix = GenerateScaleMatrix(ortoedro.scale);
-
-			// Aplicamos matriz
-			ortoedroModelMatrix = ortoedroTranslationMatrix * ortoedroRotationMatrix * ortoedroScaleMatrix;
-
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedroModelMatrix));
-
-			//Dibujamos el ortoedro
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);
 
