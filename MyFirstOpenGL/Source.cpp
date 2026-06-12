@@ -354,10 +354,10 @@ void main(){
 		//Definimos cantidad de vbo a crear y donde almacenarlos
 		glGenBuffers(1, &vboCube);		
 
-		//Indico que el VBO activo es el que acabo de crear y que almacenar� un array. Todos los VBO que genere se asignaran al �ltimo VAO que he hecho glBindVertexArray
+		//Indico que el VBO activo es el que acabo de crear y que almacenar un array. Todos los VBO que genere se asignaran al �ltimo VAO que he hecho glBindVertexArray
 		glBindBuffer(GL_ARRAY_BUFFER, vboCube);		
 		
-		//Posici�n X e Y del cubo
+		//Posicion X e Y del cubo
 		GLfloat cubePunto[] = {
 			-0.5f, +0.5f, -0.5f, // 3
 			+0.5f, +0.5f, -0.5f, // 2
@@ -378,10 +378,10 @@ void main(){
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(cubePunto), cubePunto, GL_STATIC_DRAW);
 
-		//Indicamos donde almacenar y como esta distribuida la informaci�n
+		//Indicamos donde almacenar y como esta distribuida la informacion
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
-		//Indicamos que la tarjeta gr�fica puede usar el atributo 0
+		//Indicamos que la tarjeta grafica puede usar el atributo 0
 		glEnableVertexAttribArray(0);
 
 		//Desvinculamos VBO
@@ -400,10 +400,10 @@ void main(){
 		//Definimos cantidad de vbo a crear y donde almacenarlos
 		glGenBuffers(1, &vboPyramid);
 
-		//Indico que el VBO activo es el que acabo de crear y que almacenar� un array. Todos los VBO que genere se asignaran al �ltimo VAO que he hecho glBindVertexArray
+		//Indico que el VBO activo es el que acabo de crear y que almacenar un array. Todos los VBO que genere se asignaran al ultimo VAO que he hecho glBindVertexArray
 		glBindBuffer(GL_ARRAY_BUFFER, vboPyramid);
 
-		//Posici�n X e Y de la piramide
+		//Posicion X e Y de la piramide, puntos generados con IA
 		GLfloat pyramidPunto[] = {
 
 			// Cara frontal
@@ -452,10 +452,6 @@ void main(){
 		//Desvinculamos VAO
 		glBindVertexArray(0);
 
-		/*
-		CONFIGURACION DEL ORTOEDRO
-		*/
-
 		//Crear VAO para el ortoedro
 		glGenVertexArrays(1, &vaoOrtoedro);
 		glBindVertexArray(vaoOrtoedro);
@@ -499,7 +495,7 @@ void main(){
 
 
 		//Definimos modo de dibujo para cada cara
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//Indicar a la tarjeta GPU que programa debe usar
 		glUseProgram(compiledPrograms[0]);
@@ -508,16 +504,27 @@ void main(){
 		glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		//Variables para el sistema de inputs
-		bool isPaused = false;                    // Control de pausa
-		float speedMultiplier = 1.0f;             // Multiplicador de velocidad
-		bool spacePressed = false;                // Detectar cambio de estado de espacio
-		bool mPressed = false;                    // Detectar cambio de estado de M
-		bool nPressed = false;                    // Detectar cambio de estado de N
+		bool isPaused = false;			
+		float speedMultiplier = 1.0f;   
+		bool spacePressed = false;      
+		bool mPressed = false;          
+		bool nPressed = false;       
+
+		//Variables para render y wireframe
+		bool isWireframe = false;
+		bool renderCube = true;
+		bool renderOrtoedro = true;
+		bool renderPyramid = true;
+
+		bool key1Pressed = false;
+		bool key2Pressed = false;
+		bool key3Pressed = false;
+		bool key4Pressed = false;
 
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window)) {
 
-			//Pulleamos los eventos (botones, teclas, mouse...)
+			//Pulleamos los eventos
 			glfwPollEvents();
 
 			//Detectar Espacio para pausar/reanudar
@@ -534,7 +541,7 @@ void main(){
 			//Los siguientes inputs solo funcionan si NO está pausado
 			if (!isPaused) {
 
-				//Detectar M para acelerar velocidad en un 10%
+				//Detectar m para acelerar velocidad
 				if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
 					if (!mPressed) {
 						speedMultiplier *= 1.1f;  // Acelerar 10%
@@ -545,10 +552,10 @@ void main(){
 					mPressed = false;
 				}
 
-				//Detectar N para reducir velocidad en un 10%
+				//Detectar n para reducir velocidad
 				if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
 					if (!nPressed) {
-						speedMultiplier *= 0.9f;  // Reducir 10%
+						speedMultiplier *= 0.9f;
 						nPressed = true;
 					}
 				}
@@ -556,6 +563,59 @@ void main(){
 					nPressed = false;
 				}
 			}
+
+			//activar/desactivar wireframe
+			if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+				if (!key1Pressed) {
+					isWireframe = !isWireframe;
+					key1Pressed = true;
+				}
+			}
+			else {
+				key1Pressed = false;
+			}
+
+			//mostrar/ocultar cubo
+			if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+				if (!key2Pressed) {
+					renderCube = !renderCube;
+					key2Pressed = true;
+				}
+			}
+			else {
+				key2Pressed = false;
+			}
+
+			//Mostrar/ocultar ortoedro
+			if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+				if (!key3Pressed) {
+					renderOrtoedro = !renderOrtoedro;
+					key3Pressed = true;
+				}
+			}
+			else {
+				key3Pressed = false;
+			}
+
+			//Mostrar/ocultar piramide
+			if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
+				if (!key4Pressed) {
+					renderPyramid = !renderPyramid;
+					key4Pressed = true;
+				}
+			}
+			else {
+				key4Pressed = false;
+			}
+
+			//Modo fill o line
+			if (isWireframe) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}
+			else {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
+		
 
 			//Limpiamos los buffers
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -565,9 +625,7 @@ void main(){
 			glm::mat4 pyramidModelMatrix = glm::mat4(1.0f);
 			glm::mat4 ortoedroModelMatrix = glm::mat4(1.0f);
 
-			/*
-			DIBUJAR CUBO
-			*/
+			//Dibujar Cubo
 
 			if (!isPaused) {
 				//Calculamos la nueva posicion del cubo
@@ -592,9 +650,7 @@ void main(){
 			// Aplicamos matriz
 			cubeModelMatrix = cubeTranslationMatrix * cubeRotationMatrix * cubeScaleMatrix;
 
-			/*
-			DIBUJAR ORTOEDRO
-			*/
+			//Dibujar ortoedro
 
 			if (!isPaused) {
 				//Actualizamos la rotacion en Z
@@ -623,9 +679,7 @@ void main(){
 			// Aplicamos matriz
 			ortoedroModelMatrix = ortoedroTranslationMatrix * ortoedroRotationMatrix * ortoedroScaleMatrix;
 
-			/*
-			DIBUJAR PIRAMIDE
-			*/
+			//dibujar piramide
 
 			if (!isPaused) {
 				//Calculamos la nueva posicion de la piramide
@@ -666,45 +720,62 @@ void main(){
 				pyramidColor = glm::vec3(0.f, 0.f, 1.f); // Azul
 			}
 
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubeModelMatrix));
+			//cubo
+			if (renderCube) 
+			{
+				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(cubeModelMatrix));
 
-			// Indicamos el color
-			glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 0);
+				// Indicamos el color
+				glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 0);
 
-			//Usamos VAO del cubo
-			glBindVertexArray(vaoCube);
+				//Usamos VAO del cubo
+				glBindVertexArray(vaoCube);
 
-			// Definimos que queremos dibujar
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				// Definimos que queremos dibujar
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedroModelMatrix));
+				//Dejamos de usar el VAO indicado anteriormente
+				glBindVertexArray(0);
+			}
 
-			//Definimos que queremos usar el VAO del ortoedro
-			glBindVertexArray(vaoOrtoedro);
+			// ortoedro
+			if (renderOrtoedro)
+			{
+				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(ortoedroModelMatrix));
 
-			//Dibujamos el ortoedro
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+				//color que usa ortoedro
+				glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 0);
 
-			//Dejamos de usar el VAO indicado anteriormente
-			glBindVertexArray(0);
+				//Definimos que queremos usar el VAO del ortoedro
+				glBindVertexArray(vaoOrtoedro);
 
-			//matriz piramide
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(pyramidModelMatrix));
+				//Dibujamos el ortoedro
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 
-			// Indicamos que la piramide usa color solido
-			glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 1);
+				//Dejamos de usar el VAO indicado anteriormente
+				glBindVertexArray(0);
+			}
 
-			// Enviamos el color actual de la piramide
-			glUniform3f(glGetUniformLocation(compiledPrograms[0], "solidColor"), pyramidColor.x, pyramidColor.y,pyramidColor.z);
+			// piramide
+			if (renderPyramid)
+			{
+				//matriz piramide
+				glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(pyramidModelMatrix));
 
-			glBindVertexArray(vaoPyramid);
+				// Indicamos que la piramide usa color solido
+				glUniform1i(glGetUniformLocation(compiledPrograms[0], "colorMode"), 1);
 
-			//Definimos que queremos dibujar
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
-			
-			//Dejamos de usar el VAO indicado anteriormente
-			glBindVertexArray(0);
+				// Enviamos el color actual de la piramide
+				glUniform3f(glGetUniformLocation(compiledPrograms[0], "solidColor"), pyramidColor.x, pyramidColor.y, pyramidColor.z);
 
+				glBindVertexArray(vaoPyramid);
+
+				//Definimos que queremos dibujar
+				glDrawArrays(GL_TRIANGLES, 0, 18);
+
+				//Dejamos de usar el VAO indicado anteriormente
+				glBindVertexArray(0);
+			}
 			//Cambiamos buffers
 			glFlush();
 			glfwSwapBuffers(window);
@@ -714,7 +785,9 @@ void main(){
 		glUseProgram(0);
 		glDeleteProgram(compiledPrograms[0]);
 
-	}else {
+	}
+	else 
+	{
 		std::cout << "Ha petao." << std::endl;
 		glfwTerminate();
 	}
